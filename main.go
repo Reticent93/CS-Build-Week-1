@@ -1,5 +1,6 @@
 package main
 
+
 import (
 	"github.com/hajimehoshi/ebiten"
 	"image/color"
@@ -104,4 +105,3 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
-}
