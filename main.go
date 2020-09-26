@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	"github.com/hajimehoshi/ebiten"
 	"image/color"
@@ -13,80 +12,29 @@ var (
 	rows          = height / res
 	res           = 20
 	scale         = 2
+	grid          [][]int
 )
 
 type Game struct {
-	generation int
-	grid       [][]int
+	//generation int
+	grid [][]int
 }
 
-//func (g *Game) Error() string {
-//	panic("implement me")
-//}
-
-var grid [40][50]int
 var aqua = color.RGBA{R: 173, G: 216, B: 230}
 var blue = color.RGBA{R: 173, G: 216, B: 230}
 
 //Use this as 2D array
-func emptyGen() *Game {
-	arr := make([][]int, cols)
-	for i := 0; i < len(arr); i++ {
-		arr[i] = make([]int, rows)
-	}
-
-	return &Game{grid: arr, generation: 1}
-}
-
-//func setup()  {
-//	//grid := emptyGen(cols, rows)
-//	for i:=0;i <cols; i++ {
-//		for j:= 0; j <rows; j++ {
-//			grid[i][j] = rand.Intn(2)
-//		}
+//func emptyGen(cols, rows int)  {
+//	arr := make([][]int, cols)
+//	for i := 0; i < len(arr); i++ {
+//		arr[i] = make([]int, rows)
 //	}
+//
+//	return
 //}
 
-//func newState(g *Game)  {
-//	rand.Seed(time.Now().UnixNano())
-//	for x := 0; x < res; x++ {
-//		for y := 0; y < res; y++ {
-//			if rand.Intn(15) == 1 {
-//				g.grid[x][y] = 1
-//			}
-//		}
-//	}
-//}
-
-func (g *Game) Update(screen *ebiten.Image) error {
-	//rand.Seed(time.Now().UnixNano())
-	for x := 1; x < cols; x++ {
-		for y := 1; y < rows; y++ {
-			state := grid[x][y]
-			neighbors := countNeighbor(x, y, g.grid)
-
-			if state == 0 && neighbors == 3 {
-				//need to make another grid
-			} else if state == 1 && (neighbors < 2 || neighbors > 3) {
-				//make another grid
-			} else {
-				//make another grid
-			}
-
-			//sum +=grid[x-1][y-1]
-			//sum +=grid[x][y-1]
-			//sum +=grid[x+1][y-1]
-			//sum +=grid[x+1][y]
-			//sum +=grid[x+1][y+1]
-			//sum +=grid[x-1][y]
-			//sum +=grid[x][y+1]
-			//sum +=grid[x-1][y]
-		}
-	}
-	return nil
-}
-
-func (g *Game) Draw(screen *ebiten.Image) {
+//Drawing the game board
+func Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 	for i := 0; i < cols; i++ {
 		for j := 0; j < rows; j++ {
@@ -105,3 +53,65 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 
+}
+
+//Counting the neighbors
+func countNeighbor(g *Game, x, y int) int {
+	sum := 0
+	for i := -1; i < 2; i++ {
+		for j := -1; j < 2; j++ {
+			//		cols = ( int(x + i) + cols) % cols
+			//		rows = (int(y + j) + rows) % rows
+			//		sum += grid[i-1][j-1]
+			//		sum += grid[i][j-1]
+			//		sum += grid[i+1][j-1]
+			//		sum += grid[i+1][j]
+			//		sum += grid[i+1][j+1]
+			//		sum += grid[i][j+1]
+			//		sum += grid[i-1][j+1]
+			//		sum += grid[i-1][j]
+			sum += g.grid[i][j]
+		}
+	}
+	sum -= g.grid[x][y]
+	return sum
+}
+
+var next = Draw
+
+//Updating the game board
+func (g *Game) Update(screen *ebiten.Image) error {
+	//rand.Seed(time.Now().UnixNano())
+	for x := 1; x < cols; x++ {
+		for y := 1; y < rows; y++ {
+			var state = grid[x][y]
+			neighbors := countNeighbor()
+
+			if state == 0 && neighbors == 3 {
+				//need to make another grid
+				grid[x][y] = 1
+			} else if state == 1 && (neighbors < 2 || neighbors > 3) {
+				//make another grid
+				grid[x][y] = 0
+			} else {
+				//make another grid
+				grid[x][y] = state
+			}
+		}
+	}
+	return nil
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return 640, 500
+}
+
+func main() {
+	//e := emptyGen()
+	//newState(e)
+	ebiten.SetWindowSize(1040, 800)
+	ebiten.SetWindowTitle("Conway's Game of Life")
+	if err := ebiten.RunGame(&Game{}); err != nil {
+		log.Fatal(err)
+	}
+}
